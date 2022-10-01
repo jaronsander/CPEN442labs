@@ -15,9 +15,9 @@ all_pot_encrypt_maps = []
 
 if __name__ == '__main__':
     #generate top X potential mappings
-    map1 = [a_tuple[0] for a_tuple in pairs_frequencies][0:6]
+    map1 = [a_tuple[0] for a_tuple in pairs_frequencies][0:max_combs]
     print(map1)
-    map2 = en_most_frequent[0:6]
+    map2 = en_most_frequent[0:max_combs]
     print(map2)
     for i in range(max_combs-1):
         map = {}
@@ -29,6 +29,7 @@ if __name__ == '__main__':
         map2.append(next)
 
     print(all_pot_encrypt_maps)
+    print(len(all_pot_encrypt_maps))
 
     for i in range(0,len(text),2):
         for k,v in decrypt_mappings.items():
