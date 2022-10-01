@@ -19,9 +19,9 @@ if __name__ == '__main__':
     print(map1)
     map2 = en_most_frequent[0:max_combs]
     print(map2)
-    for i in range(max_combs-1):
+    for i in range(max_combs):
         map = {}
-        for y in range(max_combs-1):
+        for y in range(max_combs):
             map[map1[y]] = map2[y]
         all_pot_encrypt_maps.append(map)
         next = map2[0]
