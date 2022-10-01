@@ -14,13 +14,21 @@ all_pot_encrypt_maps = []
 
 
 if __name__ == '__main__':
-    #setup list
-    for i in range(0,max_combs):
-        all_pot_encrypt_maps.append({})
     #generate top X potential mappings
-    for i in range(0,max_combs):
-        for j in range(0,max_combs):
+    map1 = [a_tuple[0] for a_tuple in pairs_frequencies][0:6]
+    print(map1)
+    map2 = en_most_frequent[0:6]
+    print(map2)
+    for i in range(max_combs-1):
+        map = {}
+        for y in range(max_combs-1):
+            map[map1[y]] = map2[y]
+        all_pot_encrypt_maps.append(map)
+        next = map2[0]
+        del map2[0]
+        map2.append(next)
 
+    print(all_pot_encrypt_maps)
 
     for i in range(0,len(text),2):
         for k,v in decrypt_mappings.items():
