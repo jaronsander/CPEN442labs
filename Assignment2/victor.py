@@ -10,17 +10,72 @@ en_most_frequent = ['th', 'ma', 'in', 'he', 'an', 'co', 're', 'er', 'om', 'es', 
 max_combs = 6
 all_pot_encrypt_maps = []
 
-additional_mappings = {"YG":"th", "RN":"er",'LM': 'co', 'FN': 'mx', 'YM': 'ma', "MR": 'an'}
+additional_mappings = {"YG":'th', "RN":'er','LM': 'co', 'FN': 'mx', 'YM': 'ma', "MR": 'an',"TY": 'om', "GK": 'he',
+                       "YO":'my',"OT":'yo',"OA":'yt',"OM":'ya',"TA":'ot',"TM":'oa',"AM":'ta',"AY":'tm',
+                       "CK":'un',"AE":'tr',"MU":'yc',"CE":'in',
+                       "RT":'ea',"NT":'em',"KT":'ey',"NA":'rm',"KA":'ry',"EM":'nt',"KM":'ny',"EY":'kt',"RY":'ka',"NY":'km',"AE":'tr',"ME":'tn',"YE":'tk',"MR":'an',"TK":'ye',"AK":'yr',"EH":'kg'}
 # Logic behind populating the `additional_mappings` map:
-#   1. YG = th, by comparing ciphertext (CT) and OANC bigram frequencies
-#   2. RN = er, by noticing that, in OANC frequencies, 're' and 'er' are pretty common bigrams. Since this would result,
+#    1. YG = th, by comparing ciphertext (CT) and OANC bigram frequencies
+#    2. RN = er, by noticing that, in OANC frequencies, 're' and 'er' are pretty common bigrams. Since this would result,
 # upon encryption, in ".,"-",." where '.' is some letter ; ',' a different letter, by looking at the most common
 # bigrams in the CT, "RN"-"NR" is the most frequent matching that property
-#   3. LM = co, by comparing CT and OANC bigrams, as well as comparing 6grams
-#   4. FN = mx, YM = ma, knowing 3., and comparing 6 grams evidently results in these mappings
-#   5. MR = an, looking at 6 grams, we notice that "FNYMMR" is common in our CT. Knowing 3,4, this results in "mxma.."
-#Looking at most OANC 6 grams, we notice the most frequent following that pattern are "mxmaan", and "mxmath".
+#
+#   At this point, simply trying to guess mappings using the partially decrypted text did not help us anymore, since a
+#   lot of the possible decryptions (using n_perm=6) could have been correct (partial words that made sense). We therefore started
+#   generalizing our search method to NGrams, N>2; and cross-comparing each Ngram
+#
+#    3. LM = co, by comparing CT and OANC bigrams, as well as comparing 6grams
+#    4. FN = mx, YM = ma, knowing 3., and comparing 6 grams evidently results in these mappings
+#    5. MR = an, looking at 6 grams, we notice that "FNYMMR" is common in our CT. Knowing 3,4, this results in "mxma.."
+# Looking at most OANC 6 grams, we notice the most frequent following that pattern are "mxmaan", and "mxmath".
 # Knowing 1., we get MR=an .
+#    6. TY = om, looking at the most common CT 4grams, we notice "TYYM", which is translated to "..MA" knowing 4.
+# Looking at OANC 4 grams, only 2 such mappings are relatively that frequent 'mxma' (impossible since we know 'mx'=FN)
+# and 'omma'; the next one being 'orma' (but appears 26 times less frequently than 'omma') --> TY=om (which we confirmed by their +- matching bigram frequencies)
+#    7. GK = he - This was the next most common bigram, and we decided to focus on it. When looking at some of the
+# decrypted versions of the ciphertext, we conveniently had the long (sequence of potentially partial) word(s)
+# 'GKrethanCEan' (aka "GKNRYGMRCEMR"), which contained two of our searched for bigrams : GK and CE! Making a one to one
+# mapping of by bigram frequencies yielded "inrethanotan", which is impossible given the words of the english language
+# (see  https://www.thefreedictionary.com/words-containing-reth ,https://www.thefreedictionary.com/words-containing-inre
+# https://www.thefreedictionary.com/words-that-end-in-inre ) Looking at the second most common bigram mapping, we
+# therefore hypotethised GK = 'he', yielding several results (depending on the translation of 'CE'), but namely
+# "herethanonan", "herethaninan" and "herethanatan", which all sound plausible assuming "an" turns in any
+# Note that ngrams, with n>2 couldn't help us for that due to the very low frequency of that bigram in them
+# This was (one of our) working hypothesis, that eventually (once finding a coherently deciphered plaintext) we found
+# out was correct and kept, thus explaining it here
+# 8.W e then realized that using our ngram technique started becoming two complicated for n>2 (due to the relatively
+# small CT), and started looking at different approaches to deciphering the CT. We thus took a step back, and tried to
+# recreate the key, based off the currently known mappings. We then noticed an interesting property: 'Y' has been
+# deciphered 3 times, and in "YM"<->"ma","YT"<->"mo",all of 'y','m' and 't' appear, suggesting that they are in the same
+# column or line (otherwise Y would've been mapped to something else)!
+# We assumed a column, yielding therefore something of the type (+-shift):
+# | m | .This therefore yields several new mappings!
+# | y |'my':"YO",'yo':"OT",'yt':"OA", 'ya':"OM", 'ot':"TA",'oa':"TM",
+# | o |'ta':"AM", 'tm':"AY"!
+# | t |
+# | a |
+# We had now translated 1/4 of all the bigrams !
+#     9. Long sequences of words started appearing: a notable one being "herethanCEanyotherco......omma".
+# This immediately suggested translating to "herethanCEanyothercountrycomma" (since "here" denotes a place, and we have
+# https://nounsstarting.com/places-that-start-with-c/ ). We therefore get "CK":'un',"AE":'tr',"MU":'yc'
+# "CE" being a fairly common bigram in the CT, and "in" - in OANC, a no brainer consisted of figuring "CE":'in'
+# (note: the other top 5 candidates were 'es','on','ti','do','en'; out of which only 'on' could have made sense in that
+# context, but one would rather say 'in' a country, than 'on' a country --> choosing 'in')
+#    10. Similarly as 8., we notice "AE":'tr',"RN":'er',"MR": 'an' and, knowing the line/column from 8, we deduce that
+# E R N are on the same line/column (parallel to 8's) -->
+# | m | ? || --> this configuration is not possible! we therefore now know that 8. must be a line
+# | y | ? ||  -->| m y o t a , or, equivalently (to avoid shift when rectangle) |t a m y o
+# | o | ? ||     | ?                                                            |
+# | t | ? ||     | n . . e r                                                    |e r n . .
+# | a | ? ||     | ?                                                            |
+# Note that "CK":'un' and "GK": 'he' imply that K is also in that line, and that C and G are in different columns
+# (otherwise K would have been mapped to the same letter). 'th':"YG" gives us:
+# |t a m y o   --> we thus have a lot of new mappings (note: at that point, we don't know the relative column positions -> no column mappings)!
+# |?             -> "RT":'ea',"NT":'em',"KT":'ey',"NA":'rm',"KA":'ry',
+# |e r n k .        "EM":'nt',"KM":'ny',"EY":'kt',"RY":'ka',"NY":'km',
+# |g     h          "AE":'tr',"ME":'tn',"YE":'tk',"MR":'an',
+#                   "TK":'ye',"AK":'yr',"EH":'kg'
+
 
 
 
@@ -51,6 +106,7 @@ if __name__ == '__main__':
          for dict in all_pot_encrypt_maps:
             plaintext = ""
             replaced = 0
+            non_replaced = 0
             flag = False
             two_in_a_row = 0
             newDict = dict.copy()
@@ -76,7 +132,8 @@ if __name__ == '__main__':
                 if not alreadyReplaced:
                     plaintext+=".."
                     two_in_a_row = 0
+                    non_replaced +=1
             tern = " HAVETWO!!!" if flag else " NOPAIR:("
-            o = plaintext+'\n'+ "Replaced: " + str(replaced)  + ", using new mapping of "+str(newDict)+", assumed mapping: "+ str(additional_mappings) + " and therefore full mapping: " + str(dict) +tern + separator+'\n'
+            o = plaintext+'\n'+ "Replaced: " + str(replaced)  + " out of: "+str(replaced+non_replaced)+" , using new mapping of "+str(newDict)+", assumed mapping: "+ str(additional_mappings) + " and therefore full mapping: " + str(dict) +tern + separator+'\n'
             #print(o)
             f.write(o)
