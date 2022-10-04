@@ -1,10 +1,16 @@
 import os
 import re
+from contextlib import redirect_stdout
 fdir = "C:/Users/vesbr/Downloads/OANC-1.0.1-UTF8/OANC/data"
+
+n_freq = 3
+separator = "\n"+"#"*15+"\n"
 
 if __name__ == '__main__':
 
+    print("Generating " +str(n_freq)+ "grams")
     freq = {}
+    sum = 0
     for path, subdirs, files in os.walk(fdir):
         for name in files:
             if(name.endswith(".txt")):
@@ -21,15 +27,28 @@ if __name__ == '__main__':
                             data = data[:v]+'x'+data[v:]
                     if len(data)%2 == 1 :
                         data += 'x'
-                    partials = [data[i:i + 2] for i in range(0, len(data), 2)]
+                    # `data` now contains the string parsed as it would be if used for input to playfair cipher
+                    # we can extract partials's frequencies now --> get n_grams
+                    partials = [data[i:i + n_freq] for i in range(0, len(data), n_freq)]
                     for i in partials:
                         if i in freq:
                             freq[i] += 1
                         else:
                             freq[i] = 1
+                        sum+=1
                 #print("Finished with file" + ff+"\n")
+
     sortfreq = sorted(freq.items(), key=lambda x: x[1], reverse=True)
-    print(sortfreq)
+    normalized = [(t[0],(t[1]/sum)*100) for t in sortfreq]
     non_tuple = [t[0] for t in sortfreq]
-    print(non_tuple)
+    with open("OANC"+str(n_freq)+"gram_out.txt","w") as f:
+        with redirect_stdout(f):
+            print("Sorted, raw:\n")
+            print(sortfreq)
+            print(separator)
+            print("Sorted, normalized:\n")
+            print(normalized)
+            print(separator)
+            print("Sorted, non-tuple:\n")
+            print(non_tuple)
 
