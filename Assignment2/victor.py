@@ -13,8 +13,7 @@ en_most_frequent = ['th', 'he', 'in', 'er', 're', 'an', 'es', 'on', 'at', 'ti', 
 max_combs = 6
 all_pot_encrypt_maps = []
 
-
-additional_mappings = {}
+additional_mappings = {"YG":"th", "RN":"er",'LM': 'co', 'FN': 'mx', 'YM': 'ma'}
 
 
 
