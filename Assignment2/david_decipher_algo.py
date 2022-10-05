@@ -103,14 +103,17 @@ def changeKey(oldKey):
     k = random.randint(0,49)
     j = random.randint(0,49)
     i = random.randint(0,49)
+    #sometimes swap 2 random rows or columns
     if i == 0:
         return swap2RandRows(oldKey)
     elif i == 1:
         return swap2RandCols(oldKey)
+    # a few times reverse the key
     elif i == 2:
         for k in range(25):
             newList[k] = oldList[24-k]
         return ''.join(newList)
+
     elif i == 3:
         for k in range(5):
             for j in range(5):
@@ -121,6 +124,7 @@ def changeKey(oldKey):
             for j in range(5):
                 newList[j*5 + k] = oldList[(4-j)*5 + k]
         return ''.join(newList)
+    # most of the time, just swap 2 random letters in the key
     else: 
         return swap2randLetters(oldKey)
 
@@ -130,21 +134,31 @@ def crackPlayfair(text, bestKey):
     deciphered = decipher(maxKey, text)
     maxScore = quadgramFreqScore(deciphered)
     bestScore = maxScore
-    for T in range(2,-1, -1):
+    for T in range(100,-1, -1):
         for count in range(10000):
+            # make some small modification to maxKey
             testKey = changeKey(maxKey)
+            # decipher it, then score it
             deciphered = decipher(testKey, text)
             score = quadgramFreqScore(deciphered)
             dF = score - maxScore
+            # if df >= 0, the score of the current key was equal or higher than the previous so we set maxkey
             if dF >= 0:
                 maxScore = score
                 maxKey = testKey
+            # if df < 0, set key with probability e^(df/(T/5))
             elif T/5 > 0:
+                # idea for this is that if dF is large, e^(...) is close to zero, if small its close to one.
+                # if T is small, close to one, if T is large, close to zero
+                # reasoning is that at the beginning, T is large, but as the program progresses, T gets smaller and we accept unfit keys less often
+                # so that at the beginning we have a lot of instability in choice of next keys, but towards the end, we only accept improvements. 
+                # basically allows us to start kinda randomly and then converge to a maximum. 
                 prob = math.exp(dF/(T/5))
                 flt = random.uniform(0,1)
                 if prob > flt:
                     maxScore = score
                     maxKey = testKey
+            # then keep track of the best score we have seen so far
             if maxScore > bestScore:
                 bestScore = maxScore
                 bestKey = maxKey
