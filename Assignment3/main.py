@@ -1,6 +1,7 @@
 from hashlib import sha256
 import string
 from itertools import combinations_with_replacement
+import time
 
 id = "veryuniqueid"
 hash_of_preceding_coin = "a9c1ae3f4fc29d0be9113a42090a5ef9fdef93f5ec4777a008873972e60bb532"
@@ -16,6 +17,7 @@ def isCorrect(hex):
 
 if __name__ == '__main__':
     i = 0
+    start = time.time_ns()
     for length in range(1, 1000):
         print("length = " + str(length) + "\n")
         c_w_r = combinations_with_replacement(l_and_n,length)
@@ -27,5 +29,6 @@ if __name__ == '__main__':
             sha = sha256(("CPEN 442 Coin" + "2022" + hash_of_preceding_coin + coin_blob + id).encode('utf-8'))
             if isCorrect(sha.hexdigest()):
                 print(coin_blob, sha.hexdigest())
+                print(str(time.time_ns() - start))
                 exit()
 
